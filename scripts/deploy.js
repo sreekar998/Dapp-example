@@ -3,8 +3,8 @@ const hre = require("hardhat");
 
 async function main() {
 
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hola");
+  const Greeter = await hre.ethers.getContractFactory("IncrementDecrement");
+  const greeter = await Greeter.deploy();
 
   await greeter.deployed();
 

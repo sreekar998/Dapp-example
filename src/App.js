@@ -1,109 +1,140 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { ethers } from "ethers";
-// Import ABI Code to interact with smart contract
-import Greeter from "./artifacts/contracts/Greeter.sol/Greeter.json";
-import "./App.css";
+import IncrementDecrement from "./artifacts/contracts/IncrementDecrement.sol/IncrementDecrement.json";
 
-// The contract address
-const greeterAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+import "./App.css"
+
+const contractAddress = "0x99E53E232ec2e3Ab14efE39d1E8C516D313f104E"; // Replace with the actual contract address
 
 function App() {
-  // Property Variables
+  const [counter, setCounter] = useState(0);
+  const [contract, setContract] = useState(null);
+  const [error, setError] = useState(null);
 
-  const [message, setMessage] = useState("");
-  const [currentGreeting, setCurrentGreeting] = useState("");
+  async function connectToContract() {
+    try {
+      // Connect to the Ethereum network using the MetaMask provider
+      if (window.ethereum) {
+        await window.ethereum.enable();
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+        const signer = provider.getSigner()
 
-  // Helper Functions
+        // Load the contract using the ABI and address
+        const contract = new ethers.Contract(
+          contractAddress,
+          IncrementDecrement.abi,
+          signer
+        );
 
-  // Requests access to the user's Meta Mask Account
-  // https://metamask.io/
-  async function requestAccount() {
-    await window.ethereum.request({ method: "eth_requestAccounts" });
-  }
-
-  // Fetches the current value store in greeting
-  async function fetchGreeting() {
-    // If MetaMask exists
-    if (typeof window.ethereum !== "undefined") {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const contract = new ethers.Contract(
-        greeterAddress,
-        Greeter.abi,
-        provider
-      );
-      try {
-        // Call Greeter.greet() and display current greeting in `console`
-        /* 
-          function greet() public view returns (string memory) {
-            return greeting;
-          }
-        */
-        const data = await contract.greet();
-        console.log("data: ", data);
-        setCurrentGreeting(data);
-      } catch (error) {
-        console.log("Error: ", error);
+        setContract(contract);
+      } else {
+        setError("Please install MetaMask to use this app");
       }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to connect to the contract");
     }
   }
 
-  // Sets the greeting from input text box
-  async function setGreeting() {
-    if (!message) return;
+  async function incrementCounter() {
+    try {
+        await window.ethereum.enable();
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+        const signer = provider.getSigner()
 
-    // If MetaMask exists
-    if (typeof window.ethereum !== "undefined") {
-      await requestAccount();
+        // Load the contract using the ABI and address
+        
+        const contract = new ethers.Contract(
+          contractAddress,
+          IncrementDecrement.abi, signer
+        );
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
+        setContract(contract);
+      
+      // Call the increment function on the contract
+      await contract.increment();
 
-      // Create contract with signer
-      /*
-        function setGreeting(string memory _greeting) public {
-          console.log("Changing greeting from '%s' to '%s'", greeting, _greeting);
-          greeting = _greeting;
-        } 
-      */
-      const contract = new ethers.Contract(greeterAddress, Greeter.abi, signer);
-      const transaction = await contract.setGreeting(message);
-
-      setMessage("");
-      await transaction.wait();
-      fetchGreeting();
+      // Update the counter state
+      const newCounter = await contract.counter();
+      setCounter(newCounter.toNumber());
+    } catch (err) {
+      console.error(err);
+      setError("Failed to increment the counter");
     }
   }
 
-  // Return
+  async function decrementCounter() {
+    try {
+      await window.ethereum.enable();
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
+
+      // Load the contract using the ABI and address
+      
+      const contract = new ethers.Contract(
+        contractAddress,
+        IncrementDecrement.abi,
+        signer
+      );
+
+      setContract(contract);
+      // Call the decrement function on the contract
+      await contract.decrement();
+
+      // Update the counter state
+      const newCounter = await contract.counter();
+      setCounter(newCounter.toNumber());
+    } catch (err) {
+      console.error(err);
+      setError("Failed to decrement the counter");
+    }
+  }
+
+  async function resetCounter() {
+    try {
+      await window.ethereum.enable();
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
+
+      // Load the contract using the ABI and address
+      
+      const contract = new ethers.Contract(
+        contractAddress,
+        IncrementDecrement.abi,
+        signer
+      );
+
+      setContract(contract);
+      // Call the reset function on the contract
+      await contract.reset();
+
+      // Update the counter state
+      const newCounter = await contract.counter();
+      setCounter(newCounter.toNumber());
+    } catch (err) {
+      console.error(err);
+      setError("Failed to reset the counter");
+    }
+  }
+
   return (
-    <div className="App">
-      <div className="App-header">
-        {/* DESCRIPTION  */}
-        <div className="description">
-          <h1>Greeter.sol</h1>
-          <h3>Full stack dapp using ReactJS and Hardhat</h3>
+    <div>
+      <h1>Increment-Decrement Contract</h1>
+      {error && <p>{error}</p>}
+      {!contract ? (
+        <button onClick={connectToContract}>Connect to Contract</button>
+      ) : (
+        <div>
+          <p>Counter: {counter}</p>
+          <button onClick={incrementCounter}>Increment</button>
+          <button onClick={decrementCounter}>Decrement</button>
+          <button onClick={resetCounter}>Reset</button>
         </div>
-        {/* BUTTONS - Fetch and Set */}
-        <div className="custom-buttons">
-          <button onClick={fetchGreeting} style={{ backgroundColor: "green" }}>
-            Fetch Greeting
-          </button>
-          <button onClick={setGreeting} style={{ backgroundColor: "red" }}>
-            Set Greeting
-          </button>
-        </div>
-        {/* INPUT TEXT - String  */}
-        <input
-          onChange={(e) => setMessage(e.target.value)}
-          value={message}
-          placeholder="Set Greeting Message"
-        />
-
-        {/* Current Value stored on Blockchain */}
-        <h2 className="greeting">Greeting: {currentGreeting}</h2>
-      </div>
+      )}
     </div>
   );
 }
 
 export default App;
+
+
