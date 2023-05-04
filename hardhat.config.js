@@ -1,4 +1,6 @@
+const { config } = require('dotenv');
 require("@nomicfoundation/hardhat-toolbox");
+config()
 
 const MUMBAI_RPC_URL = process.env.MUMBAI_RPC_URL;
 const ACCOUNT_PRIVATE_KEY = process.env.ACCOUNT_PRIVATE_KEY;
@@ -14,8 +16,8 @@ module.exports = {
       chainId: 1337,
     },
     mumbai: {
-      url: "https://polygon-mumbai.g.alchemy.com/v2/1j1SzbAz4C092GdpYgDb3QQ0MeFB8nDt",
-      accounts: ["7a8721a2736356a6b2465994a786be4a3e7dfe95e22bbed42672aef94b9bb977"],
+      url: MUMBAI_RPC_URL,
+      accounts: [`${ACCOUNT_PRIVATE_KEY}`],
       chainId: 80001,
       gas: 'auto'
     }

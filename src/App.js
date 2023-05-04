@@ -28,7 +28,7 @@ function App() {
 
         setContract(contract);
       } else {
-        setError("Please install MetaMask to use this app");
+        setError("Please install MetaMask");
       }
     } catch (err) {
       console.error(err);
@@ -42,8 +42,6 @@ function App() {
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         const signer = provider.getSigner()
 
-        // Load the contract using the ABI and address
-        
         const contract = new ethers.Contract(
           contractAddress,
           IncrementDecrement.abi, signer
@@ -67,9 +65,7 @@ function App() {
     try {
       await window.ethereum.enable();
       const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const signer = provider.getSigner()
-
-      // Load the contract using the ABI and address
+      const signer = provider.getSigner(); 
       
       const contract = new ethers.Contract(
         contractAddress,
@@ -94,10 +90,8 @@ function App() {
     try {
       await window.ethereum.enable();
       const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const signer = provider.getSigner()
+      const signer = provider.getSigner();
 
-      // Load the contract using the ABI and address
-      
       const contract = new ethers.Contract(
         contractAddress,
         IncrementDecrement.abi,
@@ -122,7 +116,7 @@ function App() {
       <h1>Increment-Decrement Contract</h1>
       {error && <p>{error}</p>}
       {!contract ? (
-        <button onClick={connectToContract}>Connect to Contract</button>
+        <button onClick={connectToContract}>Connect your wallet</button>
       ) : (
         <div>
           <p>Counter: {counter}</p>
